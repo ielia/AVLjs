@@ -32,6 +32,26 @@ function traverseTree(tree, height, nth) {
     return traverseNodes(tree._root, pad(Number(nth).toString(2), height));
 }
 
+function createNodeView(h, nth, cell) {
+    const node = traverseTree(tree, h, nth);
+    // console.log('NODE h:', h, ', nth:', nth, 'node:', node);
+    if (node) {
+        cell.className = 'cell node';
+        const value = document.createElement('div'),
+            leftH = document.createElement('div'),
+            rightH = document.createElement('div');
+        value.className = 'value';
+        value.innerHTML = node.value;
+        leftH.className = 'height left';
+        leftH.innerHTML = node.left.height;
+        rightH.className = 'height right';
+        rightH.innerHTML = node.right.height;
+        cell.appendChild(value);
+        cell.appendChild(leftH);
+        cell.appendChild(rightH);
+    }
+}
+
 function visualise(tree) {
     const treeHeight = tree._root.height,
         treeGrowth = growth(treeHeight),
@@ -40,7 +60,7 @@ function visualise(tree) {
     // console.log('TREE HEIGHT:', treeHeight, '| TREE GROWTH:', treeGrowth);
     canvas.innerHTML = '';
     canvas.style.width = `${numColumns * 60}px`;
-    canvas.style.height = `${treeHeight * 50}px`;
+    canvas.style.height = `${treeHeight * 75 + 50}px`;
     for (let i = 0; i < treeHeight; ++i) {
         const indentation = treeGrowth[treeHeight - i - 1],
             separation = treeGrowth[treeHeight - i] + 1,
@@ -53,13 +73,7 @@ function visualise(tree) {
             cell.className = 'cell';
             row.appendChild(cell);
             if (j >= indentation && !((j - indentation) % separation)) {
-                const nth = ((j - indentation) / separation),
-                    node = traverseTree(tree, i, nth);
-                // console.log('NODE i:', i, ', j:', j, ', nth:', nth, 'node:', node);
-                if (node) {
-                    cell.className = 'cell node';
-                    cell.innerHTML = node.value;
-                }
+                createNodeView(i, (j - indentation) / separation, cell);
             }
         }
     }

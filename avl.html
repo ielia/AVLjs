@@ -3,7 +3,24 @@
     <head>
         <script src="avl.js"></script>
         <script src="vis.js"></script>
+        <script language="javascript">
+let tree = new Tree();
+function maybeInsert(event) {
+    if (event.keyCode === 13) {
+        const insertBox = document.getElementById('insert-box');
+        insertBox.value.split(' ').forEach((value) => {
+            const num = Number(value);
+            if (!Number.isNaN(num)) { tree.add(num); }
+        });
+        visualise(tree);
+    }
+}
+        </script>
         <style>
+.insert-box {
+    margin: 10px 5%;
+    width: 90%;
+}
 .canvas {
     /* width: 800px; */
     /* height: 500px; */
@@ -11,11 +28,13 @@
     display: flex;
     flex: auto 0 0;
     flex-direction: column;
+    justify-content: space-around;
 }
 .row {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    /* margin: 25px auto; */
     width: 100%;
 }
 .cell {
@@ -24,15 +43,32 @@
     width: 50px;
 }
 .node {
-    background-color: gray;
-    justify-content: space-around;
-    line-height: 50px;
+    background-color: lightgray;
+    display: block;
+    line-height: 25px;
+    text-align: center;
     vertical-align: middle;
+}
+.value {
+    height: 50%;
+    width: 100%;
+}
+.height {
+    display: inline-block;
+    height: 50%;
+    width: 50%;
+}
+.left {
+    color: red;
+}
+.right {
+    color: green;
 }
         </style>
     </head>
     <body>
         <h1>Tree (Console)</h1>
+        <input type="text" id="insert-box" class="insert-box" placeholder="insert values" onkeydown="maybeInsert(event);" />
         <div class="canvas"></div>
     </body>
 </html>
