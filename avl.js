@@ -98,7 +98,7 @@ class Node {
 class Tree {
     constructor(cmp) {
         this._cmp = cmp || ((a, b) => a - b);
-        this._root = { add: (value) => [1, new Node(value, this._cmp)], collect: () => [], has: () => false, toString: () => 'Tree{}' };
+        this._root = { add: (value) => [1, new Node(value, this._cmp)], collect: () => [], has: () => false, height: 0, toString: () => 'Tree{}' };
     }
     add(value) {
         let dir;
