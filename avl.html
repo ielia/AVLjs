@@ -12,6 +12,7 @@ function maybeInsert(event) {
             const num = Number(value);
             if (!Number.isNaN(num)) { tree.add(num); }
         });
+        insertBox.value = '';
         visualise(tree);
     }
 }
