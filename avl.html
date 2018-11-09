@@ -10,7 +10,14 @@ function maybeInsert(event) {
         const insertBox = document.getElementById('insert-box');
         insertBox.value.split(' ').forEach((value) => {
             const num = Number(value);
-            if (!Number.isNaN(num)) { tree.add(num); }
+            if (!Number.isNaN(num)) {
+                const operationLog = document.querySelector('.operation-log'),
+                    logEntry = document.createElement('div');
+                tree.add(num);
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = tree.toString();
+                operationLog.prepend(logEntry);
+            }
         });
         insertBox.value = '';
         visualise(tree);
@@ -65,11 +72,24 @@ function maybeInsert(event) {
 .right {
     color: green;
 }
+.operation-log {
+    background-color: lightgray;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.log-entry {
+    font-family: monospace;
+    padding: 2px 0;
+    width: 100%;
+}
         </style>
     </head>
     <body>
         <h1>Tree (Console)</h1>
         <input type="text" id="insert-box" class="insert-box" placeholder="insert values" onkeydown="maybeInsert(event);" />
         <div class="canvas"></div>
+        <div class="operation-log"></div>
     </body>
 </html>

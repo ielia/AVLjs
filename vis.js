@@ -1,4 +1,5 @@
-const canvasSelector = '.canvas';
+const canvasSelector = '.canvas',
+    logSelector = '.operation-log';
 
 function growth(n) {
     let result;
