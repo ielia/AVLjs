@@ -54,31 +54,34 @@ class Node {
 
         let rotated = this;
         const bf = this.bf;
-        if (bf < -1 || 1 < bf) {
-            if (Math.sign(dir) !== Math.sign(subdir)) {
-                const childName = dir < 0 ? 'left' : 'right',
-                    child = this[childName];
-                this[childName] = child._rotate(subdir);
+        if (bf < -1) {
+            if (subdir > 0) {
+                this.left = this.left._rotateLeft();
             }
-            rotated = this._rotate(dir);
+            rotated = this._rotateRight();
+        } else if (bf > 1) {
+            if (subdir < 0) {
+                this.right = this.right._rotateRight();
+            }
+            rotated = this._rotateLeft();
         }
         return [dir, rotated];
     }
 
-    /**
-     * -: right-rotation, +: left-rotation
-     */
-    _rotate(direction) {
-        let rotated = this;
-        if (direction) {
-            const [childName, opposite] = direction < 0 ? ['left', 'right'] : ['right', 'left'],
-                child = this[childName],
-                middle = child[opposite];
-            this[childName] = middle;
-            child[opposite] = this;
-            rotated = child;
-        }
-        return rotated;
+    _rotateLeft() {
+        const child = this.right,
+            middle = child.left;
+        this.right = middle;
+        child.left = this;
+        return child;
+    }
+
+    _rotateRight() {
+        const child = this.left,
+            middle = child.right;
+        this.left = middle;
+        child.right = this;
+        return child;
     }
 
     has(value) {
