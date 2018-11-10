@@ -1,56 +1,70 @@
-const canvasPaddingBottom = 25,
-    canvasPaddingLeft = 25,
-    canvasPaddingRight = 25,
-    canvasPaddingTop = 25,
-    canvasSelector = '#canvas',
-    innerSVGSelector = '#canvas > svg',
-    logSelector = '#operation-log',
-    nodeHeight = 50,
-    nodeMarginVertical = 25,
-    nodeWidth = 50;
+const CANVAS_PADDING_BOTTOM = 25,
+    CANVAS_PADDING_LEFT = 25,
+    CANVAS_PADDING_RIGHT = 25,
+    CANVAS_PADDING_TOP = 25,
+    CANVAS_SELECTOR = '#canvas',
+    SVG_SELECTOR = '#canvas > svg',
+    LOG_SELECTOR = '#operation-log',
+    NODE_VIEW_HEIGHT = 50,
+    NODE_VIEW_MARGIN_VERTICAL = 25,
+    NODE_VIEW_WIDTH = 50;
 
-function growth(n) {
-    return [...Array(n+1).keys()].map(i => Math.pow(2,i));
-}
-
-function pad(str, len) {
-  return len === 0 ? '' : str.length < len ? pad("0" + str, len) : str;
-}
-
-function traverseNodes(node, path) {
-    let result;
-    if (node.height === 0) {
-        result = null;
-    } else if (!path) {
-        result = node;
-    } else {
-        result = traverseNodes(path[0] === '0' ? node.left : node.right, path.slice(1));
+class NodeSVGBuilder {
+    constructor(treeHeight) {
+        this.treeHeight = treeHeight;
+        this.treeGrowth = [...Array(this.treeHeight + 1).keys()].map(i => Math.pow(2, i));
+        this.numColumns = this.treeGrowth[this.treeHeight] - 1;
+        this.canvas = document.querySelector(CANVAS_SELECTOR);
+        this.canvas.style.width = `${CANVAS_PADDING_LEFT + this.numColumns * NODE_VIEW_WIDTH + CANVAS_PADDING_RIGHT}px`;
+        this.canvas.style.height = `${CANVAS_PADDING_TOP + this.treeHeight * (NODE_VIEW_HEIGHT + NODE_VIEW_MARGIN_VERTICAL) - NODE_VIEW_MARGIN_VERTICAL + CANVAS_PADDING_BOTTOM}px`;
+        this.svg = document.querySelector(SVG_SELECTOR);
+        this.svg.innerHTML = '';
+        this.svg.setAttribute('viewBox', `0 0 ${this.numColumns * NODE_VIEW_WIDTH} ${this.treeHeight * (NODE_VIEW_HEIGHT + NODE_VIEW_MARGIN_VERTICAL) - NODE_VIEW_MARGIN_VERTICAL}`);
+        this.priorIndentation = 0;
+        this.priorSeparation = 0;
+        this.path = '';
     }
-    return result;
-}
 
-function traverseTree(tree, height, nth) {
-    return traverseNodes(tree._root, pad(Number(nth).toString(2), height));
-}
+    visitNode(node) {
+        const currentPath = this.path,
+            h = currentPath.length,
+            nth = parseInt(currentPath || '0', 2),
+            parentNth = Math.floor(nth / 2),
+            indentation = this.treeGrowth[this.treeHeight - h - 1] - 1,
+            separation = this.treeGrowth[this.treeHeight - h],
+            nodeView = this._createNodeView(
+                node,
+                h,
+                (indentation + separation * nth) * NODE_VIEW_WIDTH,
+                h * (NODE_VIEW_HEIGHT + NODE_VIEW_MARGIN_VERTICAL),
+                (this.priorIndentation + this.priorSeparation * parentNth) * NODE_VIEW_WIDTH,
+                (h - 1) * (NODE_VIEW_HEIGHT + NODE_VIEW_MARGIN_VERTICAL)
+            );
+        this._visitChild(node.left, currentPath, '0', indentation, separation);
+        this._visitChild(node.right, currentPath, '1', indentation, separation);
+        this.svg.appendChild(nodeView);
+    }
 
-function createSVGElement(type, attrs = {}) {
-    return Object.entries(attrs).reduce((element, [k, v]) => { element.setAttribute(k, v); return element; }, document.createElementNS('http://www.w3.org/2000/svg', type));
-}
+    visitNullNode() {}
 
-function createNodeView(h, nth, x, y, parentX, parentY) {
-    const node = traverseTree(tree, h, nth);
-    let nodeView;
-    if (node) {
-        nodeView = createSVGElement('g');
-        const nodeBF = node.bf,
+    _visitChild(child, currentPath, side, indentation, separation) {
+        this.path = currentPath + side;
+        this.priorIndentation = indentation;
+        this.priorSeparation = separation;
+        child.accept(this);
+    }
+
+    _createNodeView(node, h, x, y, parentX, parentY) {
+        const nodeView = this._createSVGElement('g'),
+            nodeBF = node.bf,
             heavy = nodeBF < -1 ? ' heavy-left' : nodeBF > 1 ? ' heavy-right' : '',
-            parentLink = parentX || parentY ? createSVGElement('line', { x1: parentX + nodeWidth / 2, y1: parentY + nodeHeight, x2: x + nodeWidth / 2, y2: y, class: 'parent-link' }) : null,
-            nodeBox = createSVGElement('rect', { x: x, y: y, height: nodeHeight, width: nodeWidth, class: 'node' + heavy }),
-            value = createSVGElement('text', { x: x + nodeWidth / 2, y: y + nodeHeight / 4, class: 'text value' }),
-            leftH = createSVGElement('text', { x: x + nodeWidth / 4, y: y + 3 * nodeHeight / 4, class: 'text height left' }),
-            nodeH = createSVGElement('text', { x: x + nodeWidth / 2, y: y + 5 * nodeHeight / 8, class: 'text height node-height' }),
-            bf = createSVGElement('text', { x: x + nodeWidth / 2, y: y + 7 * nodeHeight / 8, class: 'text height balance-factor' }),
-            rightH = createSVGElement('text', { x: x + 3 * nodeWidth / 4, y: y + 3 * nodeHeight / 4, class: 'text height right' });
+            parentLink = parentX > 0 || parentY > 0 ? this._createSVGElement('line', { x1: parentX + NODE_VIEW_WIDTH / 2, y1: parentY + NODE_VIEW_HEIGHT / 2, x2: x + NODE_VIEW_WIDTH / 2, y2: y + NODE_VIEW_HEIGHT / 2, class: 'parent-link' }) : null,
+            nodeBox = this._createSVGElement('rect', { x: x, y: y, height: NODE_VIEW_HEIGHT, width: NODE_VIEW_WIDTH, class: 'node' + heavy }),
+            value = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 2, y: y + NODE_VIEW_HEIGHT / 4, class: 'text value' }),
+            leftH = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 4, y: y + 3 * NODE_VIEW_HEIGHT / 4, class: 'text height left' }),
+            nodeH = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 2, y: y + 5 * NODE_VIEW_HEIGHT / 8, class: 'text height node-height' }),
+            bf = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 2, y: y + 7 * NODE_VIEW_HEIGHT / 8, class: 'text height balance-factor' }),
+            rightH = this._createSVGElement('text', { x: x + 3 * NODE_VIEW_WIDTH / 4, y: y + 3 * NODE_VIEW_HEIGHT / 4, class: 'text height right' });
         value.innerHTML = node.value;
         leftH.innerHTML = node.leftH;
         nodeH.innerHTML = node.height;
@@ -65,40 +79,26 @@ function createNodeView(h, nth, x, y, parentX, parentY) {
         nodeView.appendChild(nodeH);
         nodeView.appendChild(bf);
         nodeView.appendChild(rightH);
+        return nodeView;
     }
-    return nodeView;
+
+    _createSVGElement(type, attrs = {}) {
+        return Object.entries(attrs).reduce((element, [k, v]) => { element.setAttribute(k, v); return element; }, document.createElementNS('http://www.w3.org/2000/svg', type));
+    }
 }
 
 function visualise(tree) {
-    const treeHeight = tree._root.height,
-        treeGrowth = growth(treeHeight),
-        numColumns = treeGrowth[treeHeight] - 1,
-        canvas = document.querySelector(canvasSelector),
-        svg = document.querySelector(innerSVGSelector);
-    canvas.style.width = `${canvasPaddingLeft + numColumns * nodeWidth + canvasPaddingRight}px`;
-    canvas.style.height = `${canvasPaddingTop + treeHeight * (nodeHeight + nodeMarginVertical) - nodeMarginVertical + canvasPaddingBottom}px`;
-    svg.innerHTML = '';
-    svg.setAttribute('viewBox', `0 0 ${numColumns * nodeWidth} ${treeHeight * (nodeHeight + nodeMarginVertical) - nodeMarginVertical}`);
-    let priorIndentation = 0,
-        priorSeparation = 0;
-    for (let h = 0; h < treeHeight; ++h) {
-        const indentation = treeGrowth[treeHeight - h - 1] - 1,
-            separation = treeGrowth[treeHeight - h];
-        for (let nth = 0; nth < Math.pow(2, h); ++nth) {
-            const parentNth = Math.floor(nth / 2),
-                nodeView = createNodeView(
-                    h,
-                    nth,
-                    (indentation + separation * nth) * nodeWidth,
-                    h * (nodeHeight + nodeMarginVertical),
-                    (priorIndentation + priorSeparation * parentNth) * nodeWidth,
-                    (h - 1) * (nodeHeight + nodeMarginVertical)
-                );
-            if (nodeView) {
-                svg.appendChild(nodeView);
-            }
-        }
-        priorIndentation = indentation;
-        priorSeparation = separation;
+    tree._root.accept(new NodeSVGBuilder(tree._root.height));
+}
+
+function insertAndVisualise(tree, number) {
+    if (!Number.isNaN(number)) {
+        const operationLog = document.getElementById('operation-log'),
+            logEntry = document.createElement('div');
+        tree.add(number);
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = tree.toString() + ` <--- add(${number})`;
+        operationLog.prepend(logEntry);
+        visualise(tree);
     }
 }
