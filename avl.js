@@ -1,6 +1,7 @@
 class Node {
     static nullNode(instance, branchName) {
-        return {
+        const nullNode = {
+            accept: () => {},
             add: (value) => { const rotated = new Node(value, instance.cmp); instance[branchName] = rotated; return [0, rotated]; },
             collect: () => [],
             has: () => false,
@@ -8,6 +9,7 @@ class Node {
             toString: () => '',
             _rotateChild: () => {}
         };
+        return nullNode;
     }
 
     constructor(value, cmp) {
@@ -42,6 +44,10 @@ class Node {
     //     if (this._left) { this._left.cmp = cmp; }
     //     if (this._right) { this._right.cmp = cmp; }
     // }
+
+    accept(visitor) {
+        visitor.visit(this);
+    }
 
     add(value) {
         const dir = this._cmp(value, this.value);
@@ -89,13 +95,41 @@ class Node {
         return !dir || (dir < 0 ? this._left.has(value) : this._right.has(value));
     }
 
-    collect() {
-        return this._left.collect().concat([this._value]).concat(this._right.collect());
-    }
-
     toString() {
         return '[' + this.left.toString() + ', (' + this.leftH + ')' + this.value + '(' + this.rightH + '), ' + this.right.toString() + ']';
     }
+}
+
+class NodeCollector {
+    constructor() {
+        this._collection = [];
+    }
+
+    visit(node) {
+        node.left.accept(this);
+        this._collection.push(node.value);
+        node.right.accept(this);
+        return this;
+    }
+
+    get collection() { return this._collection; }
+}
+
+class NodeToString {
+    constructor() {
+        this._nodeString = '';
+    }
+
+    visit(node) {
+        this._nodeString += '[';
+        node.left.accept(this);
+        this._nodeString += ', (' + node.leftH + ')' + node.value + '(' + node.rightH + '), ';
+        node.right.accept(this);
+        this._nodeString += ']';
+        return this;
+    }
+
+    get nodeString() { return this._nodeString; }
 }
 
 class Tree {
@@ -109,7 +143,7 @@ class Tree {
         return dir !== 0;
     }
     has(value) { return this._root.has(value); }
-    print() { console.log('Tree contents:', JSON.stringify(this._root.collect())); }
-    toString() { return 'Tree{' + this._root.toString(); + '}'; }
+    collect() { return new NodeCollector().visit(this._root).collection; }
+    toString() { return 'Tree{' + new NodeToString().visit(this._root).nodeString + '}'; }
 }
 
