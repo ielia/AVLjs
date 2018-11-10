@@ -1,8 +1,9 @@
 class Node {
     static nullNode(instance, branchName) {
         const nullNode = {
+            _instance: instance,
             accept: (visitor) => { visitor.visitNullNode(nullNode); },
-            add: (value) => { const rotated = new Node(value, instance.cmp); instance[branchName] = rotated; return [0, rotated]; },
+            add: (value) => { const rotated = new Node(value, nullNode._instance.cmp); nullNode._instance[branchName] = rotated; return [0, rotated]; },
             has: () => false,
             height: 0,
             _rotateLeft: () => {},

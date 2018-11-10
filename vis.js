@@ -34,6 +34,7 @@ class NodeSVGBuilder {
             separation = this.treeGrowth[this.treeHeight - h],
             nodeView = this._createNodeView(
                 node,
+                currentPath,
                 h,
                 (indentation + separation * nth) * NODE_VIEW_WIDTH,
                 h * (NODE_VIEW_HEIGHT + NODE_VIEW_MARGIN_VERTICAL),
@@ -54,12 +55,12 @@ class NodeSVGBuilder {
         child.accept(this);
     }
 
-    _createNodeView(node, h, x, y, parentX, parentY) {
+    _createNodeView(node, currentPath, h, x, y, parentX, parentY) {
         const nodeView = this._createSVGElement('g'),
             nodeBF = node.bf,
             heavy = nodeBF < -1 ? ' heavy-left' : nodeBF > 1 ? ' heavy-right' : '',
             parentLink = parentX > 0 || parentY > 0 ? this._createSVGElement('line', { x1: parentX + NODE_VIEW_WIDTH / 2, y1: parentY + NODE_VIEW_HEIGHT / 2, x2: x + NODE_VIEW_WIDTH / 2, y2: y + NODE_VIEW_HEIGHT / 2, class: 'parent-link' }) : null,
-            nodeBox = this._createSVGElement('rect', { x: x, y: y, height: NODE_VIEW_HEIGHT, width: NODE_VIEW_WIDTH, class: 'node' + heavy }),
+            nodeBox = this._createSVGElement('rect', { x: x, y: y, height: NODE_VIEW_HEIGHT, width: NODE_VIEW_WIDTH, class: `node${heavy} path-${currentPath}` }),
             value = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 2, y: y + NODE_VIEW_HEIGHT / 4, class: 'text value' }),
             leftH = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 4, y: y + 3 * NODE_VIEW_HEIGHT / 4, class: 'text height left' }),
             nodeH = this._createSVGElement('text', { x: x + NODE_VIEW_WIDTH / 2, y: y + 5 * NODE_VIEW_HEIGHT / 8, class: 'text height node-height' }),

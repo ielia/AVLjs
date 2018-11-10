@@ -3,6 +3,7 @@
     <head>
         <script src="avl.js"></script>
         <script src="vis.js"></script>
+        <script src="intruder.js"></script>
         <script language="javascript">
 let tree = new Tree();
 function maybeInsert(event) {
@@ -48,6 +49,10 @@ body {
     fill: lightgray;
     rx: 5;
     ry: 5;
+}
+.node.active {
+    stroke: purple;
+    stroke-width: 2;
 }
 .node.heavy-left {
     fill: lightred;
