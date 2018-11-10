@@ -11,7 +11,7 @@ function maybeInsert(event) {
         insertBox.value.split(' ').forEach((value) => {
             const num = Number(value);
             if (!Number.isNaN(num)) {
-                const operationLog = document.querySelector('.operation-log'),
+                const operationLog = document.getElementById('operation-log'),
                     logEntry = document.createElement('div');
                 tree.add(num);
                 logEntry.className = 'log-entry';
@@ -25,11 +25,20 @@ function maybeInsert(event) {
 }
         </script>
         <style>
-.insert-box {
-    margin: 10px 5%;
-    width: 90%;
+* {
+    box-sizing: border-box;
 }
-.canvas {
+body {
+    background-color: gray;
+}
+#page-container {
+    padding: 0 10px;
+    width: 100%;
+}
+#insert-box {
+    width: 100%;
+}
+#canvas {
     /* width: 800px; */
     /* height: 500px; */
     background-color: black;
@@ -37,6 +46,7 @@ function maybeInsert(event) {
     flex: auto 0 0;
     flex-direction: column;
     justify-content: space-around;
+    margin: 10px 0;
 }
 .row {
     display: flex;
@@ -72,24 +82,33 @@ function maybeInsert(event) {
 .right {
     color: green;
 }
-.operation-log {
-    background-color: lightgray;
-    color: black;
+#operation-log {
+    background-color: black;
+    color: lightgray;
     display: flex;
     flex-direction: column;
+    font-family: monospace;
+    margin: 10px 0;
     width: 100%;
 }
 .log-entry {
-    font-family: monospace;
-    padding: 2px 0;
+    padding: 5px 10px;
     width: 100%;
+}
+.log-entry:nth-of-type(2n) {
+    background-color: #222;
 }
         </style>
     </head>
     <body>
-        <h1>Tree (Console)</h1>
-        <input type="text" id="insert-box" class="insert-box" placeholder="insert values" onkeydown="maybeInsert(event);" />
-        <div class="canvas"></div>
-        <div class="operation-log"></div>
+        <div id="page-container">
+            <h1>Tree (Console)</h1>
+            <input type="text" id="insert-box" placeholder="insert values" onkeydown="maybeInsert(event);" />
+            <div id="canvas"></div>
+            <div id="operation-log"></div>
+        </div>
+	<script language="javascript">
+            document.getElementById('insert-box').focus();
+	</script>
     </body>
 </html>

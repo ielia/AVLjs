@@ -1,15 +1,8 @@
-const canvasSelector = '.canvas',
-    logSelector = '.operation-log';
+const canvasSelector = '#canvas',
+    logSelector = '#operation-log';
 
 function growth(n) {
-    let result;
-    if (n < 1) {
-        result = [0];
-    } else {
-        result = growth(n - 1);
-        result.push(result[result.length - 1] * 2 + 1);
-    }
-    return result;
+    return [...Array(n+1).keys()].map(i => Math.pow(2,i));
 }
 
 function pad(str, len) {
@@ -56,15 +49,15 @@ function createNodeView(h, nth, cell) {
 function visualise(tree) {
     const treeHeight = tree._root.height,
         treeGrowth = growth(treeHeight),
-        numColumns = treeGrowth[treeHeight],
+        numColumns = treeGrowth[treeHeight] - 1,
         canvas = document.querySelector(canvasSelector);
     // console.log('TREE HEIGHT:', treeHeight, '| TREE GROWTH:', treeGrowth);
     canvas.innerHTML = '';
     canvas.style.width = `${numColumns * 60}px`;
     canvas.style.height = `${treeHeight * 75 + 50}px`;
     for (let i = 0; i < treeHeight; ++i) {
-        const indentation = treeGrowth[treeHeight - i - 1],
-            separation = treeGrowth[treeHeight - i] + 1,
+        const indentation = treeGrowth[treeHeight - i - 1] - 1,
+            separation = treeGrowth[treeHeight - i],
             row = document.createElement('div');
         row.className = 'row';
         canvas.appendChild(row);
