@@ -10,8 +10,10 @@ function maybeInsert(event) {
     if (event.keyCode === 13) {
         const insertBox = document.getElementById('insert-box');
         insertBox.value.split(' ').forEach((value) => {
-            const num = Number(value);
-            insertAndVisualise(tree, num);
+            if (value) {
+                const num = Number(value);
+                insertAndVisualise(tree, num);
+            }
         });
         insertBox.value = '';
     }

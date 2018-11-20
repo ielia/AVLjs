@@ -1,48 +1,61 @@
-class Node {
-    static nullNode(instance, branchName) {
-        const nullNode = {
-            _instance: instance,
-            accept: (visitor) => { visitor.visitNullNode(nullNode); },
-            add: (value) => { const rotated = new Node(value, nullNode._instance.cmp); nullNode._instance[branchName] = rotated; return [0, rotated]; },
-            has: () => false,
-            height: 0,
-            _rotateLeft: () => {},
-            _rotateRight: () => {}
-        };
-        return nullNode;
-    }
-
-    constructor(value, cmp) {
+class BaseNode {
+    constructor(cmp) {
         this._cmp = cmp || ((a, b) => a - b);
+    }
+    get bf() {}
+    get cmp() { return this._cmp; }
+    get height() {}
+    get left() {}
+    get leftH() {}
+    get right() {}
+    get rightH() {}
+    get value() {}
+    accept(visitor) {}
+    add(value) {}
+    has(value) {}
+}
+
+class NullNode extends BaseNode {
+    static getInstance(cmp) {
+        if (!NullNode.singleInstance) { NullNode.singleInstance = new NullNode(cmp); }
+        return NullNode.singleInstance;
+    }
+    get bf() { return 0; }
+    get height() { return 0; }
+    accept(visitor) { visitor.visitNullNode(this); }
+    add(value) { return [0, new Node(value, this.cmp)]; }
+    has(value) { return false; }
+}
+
+class Node extends BaseNode {
+    constructor(value, cmp) {
+        super(cmp);
         this._value = value;
         this.left = null;
         this.right = null;
     }
 
-    get cmp() { return this._cmp; }
+    get bf() { return this._rightH - this._leftH; }
+
+    get height() { return Math.max(this._leftH, this._rightH) + 1; }
 
     get left() { return this._left; }
     set left(left) {
-        this._left = left && left.height ? left : this._createNullNode('left');
+        this._left = left ? left : NullNode.getInstance(this._cmp);
         this._leftH = this._left.height;
     }
 
+    get leftH() { return this._leftH; }
+
     get right() { return this._right; }
     set right(right) {
-        this._right = right && right.height ? right : this._createNullNode('right');
+        this._right = right ? right : NullNode.getInstance(this._cmp);
         this._rightH = this._right.height;
     }
 
-    get leftH() { return this._leftH; }
     get rightH() { return this._rightH; }
-    get height() { return Math.max(this._leftH, this._rightH) + 1; }
-    get bf() { return this._rightH - this._leftH; }
 
     get value() { return this._value; }
-
-    _createNullNode(branchName) {
-        return Node.nullNode(this, branchName);
-    }
 
     accept(visitor) {
         visitor.visitNode(this);
@@ -56,7 +69,10 @@ class Node {
         } else if (dir > 0) {
             [subdir, this.right] = this.right.add(value);
         }
+        return this._balance(dir, subdir);
+    }
 
+    _balance(dir, subdir) {
         let rotated = this;
         const bf = this.bf;
         if (bf < -1) {
@@ -129,10 +145,14 @@ class NodeStringifier {
     get nodeString() { return this._nodeString; }
 }
 
+class NullRoot extends NullNode {
+    add(value) { return [1, super.add(value)[1]]; }
+}
+
 class Tree {
     constructor(cmp) {
         this._cmp = cmp || ((a, b) => a - b);
-        this._root = { accept: (visitor) => { visitor.visitNullNode(this._root); }, add: (value) => [1, new Node(value, this._cmp)], has: () => false, height: 0 };
+        this._root = new NullRoot(this._cmp);
     }
 
     add(value) {
