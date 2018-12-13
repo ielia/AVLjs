@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <script src="index.js"></script>
+        <style>
+* {
+    box-sizing: border-box;
+}
+html, body {
+    background-color: darkgrey;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+div {
+    margin: 0;
+    padding: 0;
+}
+.tree {
+    background-color: black;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 10px;
+    position: relative;
+    width: 100%;
+}
+.root {
+    height: 100%;
+    position: relative;
+    width: 100%;
+}
+.node {
+    background-color: lightgray;
+    height: 50px;
+    line-height: 40px;
+    margin: 0 auto;
+    padding: 5px;
+    text-align: center;
+    vertical-align: middle;
+    width: 50px;
+}
+.links {
+    height: 20px;
+    width: 100%;
+}
+.links.left-side::before,.links.right-side::before,.links.both-sides::before {
+    background-color: white;
+    content: "";
+    height: 10px;
+    margin: 0 calc(50% - 0.5px);
+    position: absolute;
+    width: 1px;
+}
+.links.left-side::after,.links.right-side::after,.links.both-sides::after {
+    content: "";
+    height: 10px;
+    position: absolute;
+    top: 60px;
+}
+.links.left-side::after {
+    border-top: 1px solid white;
+    border-left: 1px solid white;
+    margin: 0 calc(25% - 0.5px);
+    width: 25%;
+}
+.links.right-side::after {
+    border-top: 1px solid white;
+    border-right: 1px solid white;
+    margin: 0 calc(50% - 0.5px);
+    width: 25%;
+}
+.links.both-sides::after {
+    border: 1px solid white;
+    border-bottom: 0;
+    margin: 0 25%;
+    width: 50%;
+}
+.descendants {
+    height: calc(100% - 70px);
+    position: relative;
+    width: 100%;
+}
+.left,.right {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: 50%;
+}
+.left {
+    left: 0;
+}
+.right {
+    right: 0;
+}
+        </style>
+    </head>
+    <body>
+        <div class="tree">
+            <div class="root path-">
+                <div class="node">
+                    <span class="value">8</span>
+                </div>
+                <div class="links both-sides"></div>
+                <div class="descendants">
+                    <div class="left path-0">
+                        <div class="node">
+                            <span class="value">4</span>
+                        </div>
+                        <div class="links both-sides"></div>
+                        <div class="descendants">
+                            <div class="left path-00">
+                                <div class="node">
+                                    <span class="value">2</span>
+                                </div>
+                                <div class="links both-sides"></div>
+                                <div class="descendants">
+                                    <div class="left path-000">
+                                        <div class="node">
+                                            <span class="value">1</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                    <div class="right path-001">
+                                        <div class="node">
+                                            <span class="value">3</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="right path-01">
+                                <div class="node">
+                                    <span class="value">6</span>
+                                </div>
+                                <div class="links both-sides"></div>
+                                <div class="descendants">
+                                    <div class="left path-010">
+                                        <div class="node">
+                                            <span class="value">5</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                    <div class="right path-011">
+                                        <div class="node">
+                                            <span class="value">7</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right path-1">
+                        <div class="node">
+                            <span class="value">12</span>
+                        </div>
+                        <div class="links both-sides"></div>
+                        <div class="descendants">
+                            <div class="left path-10">
+                                <div class="node">
+                                    <span class="value">10</span>
+                                </div>
+                                <div class="links both-sides"></div>
+                                <div class="descendants">
+                                    <div class="left path-100">
+                                        <div class="node">
+                                            <span class="value">9</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                    <div class="right path-101">
+                                        <div class="node">
+                                            <span class="value">11</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="right path-11">
+                                <div class="node">
+                                    <span class="value">14</span>
+                                </div>
+                                <div class="links both-sides"></div>
+                                <div class="descendants">
+                                    <div class="left path-110">
+                                        <div class="node">
+                                            <span class="value">13</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                    <div class="right path-111">
+                                        <div class="node">
+                                            <span class="value">15</span>
+                                        </div>
+                                        <div class="links"></div>
+                                        <div class="descendants"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
