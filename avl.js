@@ -23,7 +23,7 @@ class NullNode extends BaseNode {
     get bf() { return 0; }
     get height() { return 0; }
     accept(visitor) { visitor.visitNullNode(this); }
-    add(value) { return [0, new Node(value, this.cmp)]; }
+    add(value) { return [true, 0, new Node(value, this.cmp)]; }
     has(value) { return false; }
 }
 
@@ -63,16 +63,17 @@ class Node extends BaseNode {
 
     add(value) {
         const dir = this._cmp(value, this.value);
-        let subdir = 0;
+        let subdir = 0,
+            added = false;
         if (dir < 0) {
-            [subdir, this.left] = this.left.add(value);
+            [added, subdir, this.left] = this.left.add(value);
         } else if (dir > 0) {
-            [subdir, this.right] = this.right.add(value);
+            [added, subdir, this.right] = this.right.add(value);
         }
-        return this._balance(dir, subdir);
+        return added ? [true, dir, this._balance(subdir)] : [false, 0, this];
     }
 
-    _balance(dir, subdir) {
+    _balance(subdir) {
         let rotated = this;
         const bf = this.bf;
         if (bf < -1) {
@@ -86,7 +87,7 @@ class Node extends BaseNode {
             }
             rotated = this._rotateLeft();
         }
-        return [dir, rotated];
+        return rotated;
     }
 
     _rotateLeft() {
@@ -145,20 +146,16 @@ class NodeStringifier {
     get nodeString() { return this._nodeString; }
 }
 
-class NullRoot extends NullNode {
-    add(value) { return [1, super.add(value)[1]]; }
-}
-
 class Tree {
     constructor(cmp) {
         this._cmp = cmp || ((a, b) => a - b);
-        this._root = new NullRoot(this._cmp);
+        this._root = new NullNode(this._cmp);
     }
 
     add(value) {
-        let dir;
-        [dir, this._root] = this._root.add(value);
-        return dir !== 0;
+        let added;
+        [added, , this._root] = this._root.add(value);
+        return added;
     }
 
     has(value) { return this._root.has(value); }

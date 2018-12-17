@@ -4,8 +4,27 @@
 
 const TRANSITION_TIME = '3.0s';
 
+function getPathCN(element) {
+    return /(path-[01]*)/.exec(element.className)[1];
+}
+
+function clearLinks(branch) {
+    const links = branch.querySelector('.links');
+    links.className = links.className.replace(/(^| )(left|right|both)-sides?($| )/, ' ').replace(/  /g, '');
+}
+
+function updateLinks(branch) {
+    const path = getPathCN(branch),
+        links = branch.querySelector('.links'),
+        left = branch.querySelector(`.${path}0`),
+        right = branch.querySelector(`.${path}1`),
+        currentLinksClass = /(^| )((left|right|both)-sides?)($| )/.exec(links.className),
+        newLinksClass = left && right ? 'both-sides' : left ? 'left-side' : right ? 'right-side' : '';
+    links.className = currentLinksClass ? links.className.replace(currentLinksClass[2], newLinksClass) : links.className + ' ' + newLinksClass;
+}
+
 function changePaths(element, pathToElement) {
-    const currentPath = /(path-[01]*)/.exec(element.className)[1],
+    const currentPath = getPathCN(element),
         branches = element.querySelectorAll('[class*="path-"]');
     element.className = element.className.replace(currentPath, `path-${pathToElement}`);
     Array.prototype.forEach.call(branches, branch => branch.className = branch.className.replace(currentPath, `path-${pathToElement}`));
@@ -70,9 +89,7 @@ function reattachToLazySusans(context, parent, child) {
     return [parentLazySusan, parentRect, childLazySusan, childRect];
 }
 
-let rotationNumber = 0;
 function rotate(path, childSubPath, middleSubPath, parentNewSubPath, middleNewSubPath, lazySusanRotationSign, elementsRotationSign) {
-    ++rotationNumber;
     let childReattached = false,
         parentReattached = false,
         parentTransitionEnded = false,
@@ -101,8 +118,6 @@ function rotate(path, childSubPath, middleSubPath, parentNewSubPath, middleNewSu
         parentTransitionEndFunctor = function (event, rot) {
             if (childReattached) {
                 parentBranch.style = {};
-                // parentLazySusan.removeChild(parentBranch);
-                // tree.removeChild(parentLazySusan);
                 if (parentNewSubPath === '0') {
                     parentBranch.className = parentBranch.className.replace(/(left|right|root)/, 'left');
                     middleBranchContainer.insertBefore(parentBranch, middleBranchContainer.firstChild);
@@ -112,22 +127,18 @@ function rotate(path, childSubPath, middleSubPath, parentNewSubPath, middleNewSu
                 }
                 changePaths(parentBranch, path + parentNewSubPath);
                 parentReattached = true;
-                // TODO: Change links.
                 if (middleTransitionEnded) { middleTransitionEndFunctor({ propertyName: 'left', stopPropagation: () => {} }); }
+                updateLinks(parentBranch);
             }
             parentTransitionEnded = true;
         },
         childTransitionEndFunctor = function (event, rot) {
             childBranch.style = {};
-            // childLazySusan.removeChild(childBranch);
-            // tree.removeChild(childLazySusan);
             if (side === '0') {
                 childBranch.className = childBranch.className.replace(/(left|right)/, 'left');
-                // childBranch.className = `left path-${path}`;
                 parentBranchContainer.insertBefore(childBranch, parentBranchContainer.firstChild);
             } else if (side === '1') {
                 childBranch.className = childBranch.className.replace(/(left|right)/, 'right');
-                // childBranch.className = `right path-${path}`;
                 parentBranchContainer.appendChild(childBranch);
             } else {
                 childBranch.className = childBranch.className.replace(/(left|right)/, 'root');
@@ -135,8 +146,8 @@ function rotate(path, childSubPath, middleSubPath, parentNewSubPath, middleNewSu
             }
             changePaths(childBranch, path);
             childReattached = true;
-            // TODO: Change links.
             if (parentTransitionEnded) { parentTransitionEndFunctor({ propertyName: 'left', stopPropagation: () => {} }); }
+            updateLinks(childBranch);
         },
         middleTransitionEndFunctor = function (event, rot) {
             if (parentReattached) {
@@ -173,6 +184,8 @@ function rotate(path, childSubPath, middleSubPath, parentNewSubPath, middleNewSu
         // middleBranch.style.border = '1px solid purple';
         middleBranch.style.transition = `all ${TRANSITION_TIME} ease`;
     }
+    updateLinks(parentBranch);
+    updateLinks(childBranch);
 
     window.setTimeout(function () {
         parentLazySusan.style.transform = `rotate(${lazySusanRotationSign}180deg)`;
